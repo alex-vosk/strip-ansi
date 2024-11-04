@@ -1,0 +1,41 @@
+name: "PR Title Check"
+
+on:
+  pull_request:
+    types:
+      - edited
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  enforce-conventional-commit:
+    name: 'Enforce Conventional Commit'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # Required to update pull request comments
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        id: lint-pr-title
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: always() && (steps.lint-pr-title.outputs.error_message != null)
+        with:
+          header: pr-title-lint-error
+          message: |
+            Hey there and thank you for opening this pull request! 👋🏼
+
+            We require pull request titles to follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/)
+            and it looks like your title needs to be adjusted.
+
+            Details:
+
+            ${{ steps.lint-pr-title.outputs.error_message }}
+      # Delete any previous comment when the issue has been resolved
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: steps.lint-pr-title.outputs.error_message == null
+        with:
+          header: pr-title-lint-error
+          delete: true
+
