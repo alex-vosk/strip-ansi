@@ -19,7 +19,6 @@ jobs:
         id: lint-pr-title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
       - uses: marocchino/sticky-pull-request-comment@v2
         if: always() && (steps.lint-pr-title.outputs.error_message != null)
         with:
