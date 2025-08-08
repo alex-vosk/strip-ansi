@@ -1,0 +1,33 @@
+name: Create New SemVer Tag And Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1.8.0
+        with:
+          token: ${{ github.token }}
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          generateReleaseNotes: true
+          name: ${{ steps.semver.outputs.next }}
+          tag: ${{ steps.semver.outputs.next }}
+          commit: ${{ github.ref_name }}
+          omitBody: true
+          token: ${{ github.token }}
