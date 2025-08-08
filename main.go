@@ -3,16 +3,23 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/pborman/ansi"
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
+
+	args := parseCliArguments()
+
+	input, output := makeInputOutputFiles(args)
+	defer input.Close()
+	defer output.Close()
+
+	// process the input and write it to the output
+	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		text := scanner.Text()
 		clean, _ := ansi.Strip([]byte(text))
-		fmt.Fprintf(os.Stdout, "%s\n", clean)
+		fmt.Fprintf(output, "%s\n", clean)
 	}
 }
