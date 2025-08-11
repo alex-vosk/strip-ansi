@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get Next Version
         id: semver
-        uses: ietf-tools/semver-action@v1.8.0
+        uses: ietf-tools/semver-action@v1.10.2
         with:
           token: ${{ github.token }}
 
