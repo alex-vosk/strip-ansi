@@ -95,4 +95,12 @@ func TestMakeInputOutputFiles(t *testing.T) {
 			t.Fatal("expected an error for non-existent input file, but got nil")
 		}
 	})
+
+	t.Run("Impossible Output File", func(t *testing.T) {
+		args := Args{InputName: stdInOut, OutputName: "/FOLDER/DOES/NOT/EXIST/non-existent-file.txt"}
+		_, _, err := makeInputOutputFiles(args)
+		if err == nil {
+			t.Fatal("expected an error for non-existent input file, but got nil")
+		}
+	})
 }
