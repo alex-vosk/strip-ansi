@@ -1,31 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
-func makeInputOutputFiles(args Args) (input *os.File, output *os.File) {
-	// default return values
-	input = os.Stdin
-	output = os.Stdout
-
+func makeInputOutputFiles(args Args) (input *os.File, output *os.File, err error) {
 	if args.InputName != stdInOut {
-		file, err := os.Open(args.InputName)
+		input, err = os.Open(args.InputName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-			os.Exit(1)
+			return
 		}
-		input = file
+	} else {
+		input = os.Stdin
 	}
 
 	if args.OutputName != stdInOut {
-		file, err := os.Create(args.OutputName)
+		output, err = os.Create(args.OutputName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-			os.Exit(1)
+			return
 		}
-		output = file
+	} else {
+		output = os.Stdout
 	}
 	return
 }
