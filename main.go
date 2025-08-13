@@ -12,12 +12,14 @@ func main() {
 
 	args := parseCliArguments()
 
-	input, output, err := makeInputOutputFiles(args)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s", err)
-		os.Exit(1)
-	}
+	// create input file
+	input, err := makeFile(args.InputName, os.Stdin, os.Open)
+	exitOnError(err)
 	defer input.Close()
+
+	// created output file
+	output, err := makeFile(args.OutputName, os.Stdout, os.Create)
+	exitOnError(err)
 	defer output.Close()
 
 	// process the input and write it to the output
@@ -26,5 +28,12 @@ func main() {
 		text := scanner.Text()
 		clean, _ := ansi.Strip([]byte(text))
 		fmt.Fprintf(output, "%s\n", clean)
+	}
+}
+
+func exitOnError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s", err)
+		os.Exit(1)
 	}
 }

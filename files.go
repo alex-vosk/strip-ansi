@@ -4,23 +4,12 @@ import (
 	"os"
 )
 
-func makeInputOutputFiles(args Args) (input *os.File, output *os.File, err error) {
-	if args.InputName != stdInOut {
-		input, err = os.Open(args.InputName)
-		if err != nil {
-			return
-		}
-	} else {
-		input = os.Stdin
-	}
+type fileMaker func(string) (*os.File, error)
 
-	if args.OutputName != stdInOut {
-		output, err = os.Create(args.OutputName)
-		if err != nil {
-			return
-		}
-	} else {
-		output = os.Stdout
+func makeFile(filename string, defaultFile *os.File, fm fileMaker) (rv *os.File, err error) {
+	if filename == stdInOut {
+		return defaultFile, nil
 	}
+	rv, err = fm(filename)
 	return
 }

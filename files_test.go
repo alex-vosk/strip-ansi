@@ -1,106 +1,58 @@
 package main
 
 import (
+	"errors"
 	"os"
-	"path/filepath"
 	"testing"
 )
 
 func TestMakeInputOutputFiles(t *testing.T) {
-	t.Run("StdIn and StdOut", func(t *testing.T) {
-		args := Args{InputName: stdInOut, OutputName: stdInOut}
-		input, output, err := makeInputOutputFiles(args)
+	t.Run("default file", func(t *testing.T) {
+		f, err := makeFile(stdInOut, os.Stderr, nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if input != os.Stdin {
-			t.Error("expected stdin for input")
-		}
-		if output != os.Stdout {
-			t.Error("expected stdout for output")
+		if f != os.Stderr {
+			t.Error("expected file for input")
 		}
 	})
 
-	t.Run("File Input and StdOut", func(t *testing.T) {
-		tempDir := t.TempDir()
-		inputFile, err := os.Create(filepath.Join(tempDir, "input.txt"))
-		if err != nil {
-			t.Fatalf("failed to create temp input file: %v", err)
-		}
-		inputFile.Close()
+	t.Run("make file - success", func(t *testing.T) {
+		const fileName = "/some/file/name"
+		actualFileName := ""
+		f, err := makeFile(fileName, os.Stderr, func(fn string) (*os.File, error) {
+			actualFileName = fn
+			return os.Stdin, nil
+		})
 
-		args := Args{InputName: inputFile.Name(), OutputName: stdInOut}
-		input, output, err := makeInputOutputFiles(args)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		defer input.Close()
-
-		if input.Name() != inputFile.Name() {
-			t.Errorf("expected input file %s, got %s", inputFile.Name(), input.Name())
+		if f != os.Stdin {
+			t.Error("expected file for input")
 		}
-		if output != os.Stdout {
-			t.Error("expected stdout for output")
+		if actualFileName != fileName {
+			t.Error("unexpected filename for input")
 		}
 	})
 
-	t.Run("StdIn and File Output", func(t *testing.T) {
-		tempDir := t.TempDir()
-		outputFilePath := filepath.Join(tempDir, "output.txt")
+	t.Run("make file - error", func(t *testing.T) {
+		const fileName = "/some/file/name"
+		const errMsg = "Can't open file"
+		actualFileName := ""
+		f, err := makeFile(fileName, os.Stderr, func(fn string) (*os.File, error) {
+			actualFileName = fn
+			return nil, errors.New(errMsg)
+		})
 
-		args := Args{InputName: stdInOut, OutputName: outputFilePath}
-		input, output, err := makeInputOutputFiles(args)
-		if err != nil {
+		if err == nil || err.Error() != errMsg {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		defer output.Close()
-
-		if input != os.Stdin {
-			t.Error("expected stdin for input")
+		if f != nil {
+			t.Error("expected file for input")
 		}
-		if output.Name() != outputFilePath {
-			t.Errorf("expected output file %s, got %s", outputFilePath, output.Name())
-		}
-	})
-
-	t.Run("File Input and File Output", func(t *testing.T) {
-		tempDir := t.TempDir()
-		inputFile, err := os.Create(filepath.Join(tempDir, "input.txt"))
-		if err != nil {
-			t.Fatalf("failed to create temp input file: %v", err)
-		}
-		inputFile.Close()
-		outputFilePath := filepath.Join(tempDir, "output.txt")
-
-		args := Args{InputName: inputFile.Name(), OutputName: outputFilePath}
-		input, output, err := makeInputOutputFiles(args)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		defer input.Close()
-		defer output.Close()
-
-		if input.Name() != inputFile.Name() {
-			t.Errorf("expected input file %s, got %s", inputFile.Name(), input.Name())
-		}
-		if output.Name() != outputFilePath {
-			t.Errorf("expected output file %s, got %s", outputFilePath, output.Name())
-		}
-	})
-
-	t.Run("Non-existent Input File", func(t *testing.T) {
-		args := Args{InputName: "non-existent-file.txt", OutputName: stdInOut}
-		_, _, err := makeInputOutputFiles(args)
-		if err == nil {
-			t.Fatal("expected an error for non-existent input file, but got nil")
-		}
-	})
-
-	t.Run("Impossible Output File", func(t *testing.T) {
-		args := Args{InputName: stdInOut, OutputName: "/FOLDER/DOES/NOT/EXIST/non-existent-file.txt"}
-		_, _, err := makeInputOutputFiles(args)
-		if err == nil {
-			t.Fatal("expected an error for non-existent input file, but got nil")
+		if actualFileName != fileName {
+			t.Error("unexpected filename for input")
 		}
 	})
 }
