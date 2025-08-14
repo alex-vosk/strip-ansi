@@ -4,9 +4,9 @@ import (
 	"flag"
 )
 
-const stdInOut = "-"
-const inputDesc = "input file name; use '-' for stdin"
-const outputDesc = "output filename; use '-' for stdout"
+const stdInOut string = "-"
+const inputDesc string = "input file name; use '-' for stdin"
+const outputDesc string = "output filename; use '-' for stdout"
 
 type Args struct {
 	InputName  string
@@ -14,7 +14,7 @@ type Args struct {
 }
 
 func parseCliArguments() Args {
-	rv := Args{}
+	var rv Args
 
 	flag.StringVar(&rv.InputName, "input", stdInOut, inputDesc)
 	flag.StringVar(&rv.InputName, "i", stdInOut, inputDesc)
