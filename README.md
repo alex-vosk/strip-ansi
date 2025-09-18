@@ -15,3 +15,4 @@
 `go install github.com/alex-vosk/strip-ansi@latest`
 
 some change
+some other change
