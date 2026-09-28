@@ -19,7 +19,7 @@ jobs:
         id: lint-pr-title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v3
         if: always() && (steps.lint-pr-title.outputs.error_message != null)
         with:
           header: pr-title-lint-error
@@ -33,7 +33,7 @@ jobs:
 
             ${{ steps.lint-pr-title.outputs.error_message }}
       # Delete any previous comment when the issue has been resolved
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v3
         if: steps.lint-pr-title.outputs.error_message == null
         with:
           header: pr-title-lint-error
